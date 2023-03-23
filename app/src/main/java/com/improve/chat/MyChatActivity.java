@@ -64,23 +64,17 @@ public class MyChatActivity extends AppCompatActivity {
         otherName = getIntent().getStringExtra("otherName");
         textViewChat.setText(otherName);
 
-        imageViewBack.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                Intent i = new Intent(MyChatActivity.this, MainActivity.class);
-                startActivity(i);
-            }
+        imageViewBack.setOnClickListener(v -> {
+            Intent i = new Intent(MyChatActivity.this, MainActivity.class);
+            startActivity(i);
         });
 
-        fab.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                String message = editTextMessage.getText().toString();
+        fab.setOnClickListener(v -> {
+            String message = editTextMessage.getText().toString();
 
-                if(!message.equals("")){
-                    sendMessage(message);
-                    editTextMessage.setText("");
-                }
+            if(!message.equals("")){
+                sendMessage(message);
+                editTextMessage.setText("");
             }
         });
         getMessage();

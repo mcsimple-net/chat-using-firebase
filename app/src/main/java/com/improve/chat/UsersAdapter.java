@@ -69,16 +69,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
                     Picasso.get().load(imageURL).into(holder.imageViewUsers);
                 }
 
-                holder.cardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(mContext,MyChatActivity.class);
-                        intent.putExtra("userName", userName);
-                        intent.putExtra("otherName",otherName);
-                        mContext.startActivity(intent);
+                holder.cardView.setOnClickListener(v -> {
+                    Intent intent = new Intent(mContext,MyChatActivity.class);
+                    intent.putExtra("userName", userName);
+                    intent.putExtra("otherName",otherName);
+                    mContext.startActivity(intent);
 
 
-                    }
                 });
 
             }

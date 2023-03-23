@@ -1,5 +1,7 @@
 package com.improve.chat;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,6 +46,8 @@ public class SignUpActivity extends AppCompatActivity {
     StorageReference storageReference;
     Uri imageUri;
 
+    ActivityResultLauncher<Intent> activityResultLauncherForImage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,35 +66,27 @@ public class SignUpActivity extends AppCompatActivity {
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        registerActivityForImage();
 
-                String email = editTextEmailSignup.getText().toString();
-                String password = editTextPasswordSignup.getText().toString();
-                String userName = editTextUsernameSignup.getText().toString();
+        buttonRegister.setOnClickListener(v -> {
 
-                if (!email.equals("") && !password.equals("") && !userName.equals(""))
-                {
-                    signup(email,password,userName);
-                }
-                else
-                {
-                    Toast.makeText(SignUpActivity.this, "Write something in the fields", Toast.LENGTH_SHORT).show();
-                }
+            String email = editTextEmailSignup.getText().toString();
+            String password = editTextPasswordSignup.getText().toString();
+            String userName = editTextUsernameSignup.getText().toString();
 
-
+            if (!email.equals("") && !password.equals("") && !userName.equals(""))
+            {
+                signup(email,password,userName);
             }
+            else
+            {
+                Toast.makeText(SignUpActivity.this, "Write something in the fields", Toast.LENGTH_SHORT).show();
+            }
+
+
         });
 
-        circleImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                imageChooser();
-
-            }
-        });
+        circleImageView.setOnClickListener(v -> imageChooser());
     }
 
     public  void imageChooser()
@@ -98,9 +94,10 @@ public class SignUpActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,1);
+        //startActivityForResult(intent,1);
+        activityResultLauncherForImage.launch(intent);
     }
-
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -115,61 +112,68 @@ public class SignUpActivity extends AppCompatActivity {
             imageControl = false;
         }
     }
+*/
 
+    public void registerActivityForImage()
+    {
+        activityResultLauncherForImage = registerForActivityResult(new ActivityResultContracts
+                .StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK)
+            {
+                Intent data = result.getData();
+                if (data != null)
+                {
+                    imageUri = data.getData();
+                    Picasso.get().load(imageUri).into(circleImageView);
+                    imageControl = true;
+                }
+            }
+            else if (result.getResultCode() == RESULT_CANCELED)
+            {
+                imageControl = false;
+            }
+        });
+    };
     public void signup(String email, String password, String userName)
     {
-        auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+        auth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(task -> {
 
-                if (task.isSuccessful())
+            if (task.isSuccessful())
+            {
+                reference.child("Users").child(auth.getUid()).child("userName").setValue(userName);
+
+                if (imageControl)
                 {
-                    reference.child("Users").child(auth.getUid()).child("userName").setValue(userName);
+                    UUID randomID = UUID.randomUUID();
+                    String imageName = "images/" + randomID + ".jpg";
+                    storageReference.child(imageName).putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
 
-                    if (imageControl)
-                    {
-                        UUID randomID = UUID.randomUUID();
-                        String imageName = "images/" + randomID + ".jpg";
-                        storageReference.child(imageName).putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                                StorageReference myStorageRef = firebaseStorage.getReference(imageName);
-                                myStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        String filePath = uri.toString();
-                                        reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                Toast.makeText(SignUpActivity.this, "Write to database is successful", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(SignUpActivity.this, "Write to database is not successful", Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    }
-                                });
-
-                            }
+                        StorageReference myStorageRef = firebaseStorage.getReference(imageName);
+                        myStorageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String filePath = uri.toString();
+                            reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(SignUpActivity.this, "Write to database is successful", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(e -> Toast.makeText(SignUpActivity.this, "Write to database is not successful", Toast.LENGTH_SHORT).show());
                         });
-                    }
-                    else
-                    {
-                        reference.child("Users").child(auth.getUid()).child("image").setValue("null");
-                    }
 
-                    Intent intent = new Intent(SignUpActivity.this,MainActivity.class);
-
-                    startActivity(intent);
-                    finish();
+                    });
                 }
                 else
                 {
-                    Toast.makeText(SignUpActivity.this, "There is a problem", Toast.LENGTH_SHORT).show();
+                    reference.child("Users").child(auth.getUid()).child("image").setValue("null");
                 }
+
+                Intent intent = new Intent(SignUpActivity.this,MainActivity.class);
+
+                startActivity(intent);
+                finish();
+            }
+            else
+            {
+                Toast.makeText(SignUpActivity.this, "There is a problem", Toast.LENGTH_SHORT).show();
             }
         });
 

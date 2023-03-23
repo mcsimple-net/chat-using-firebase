@@ -42,6 +42,7 @@
             android:background="@color/white"
             android:gravity="center"
             android:hint="@string/email"
+            android:inputType="textEmailAddress"
             android:textColor="@color/black"
             android:textColorHint="#757575" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -63,6 +64,7 @@
             android:background="@color/white"
             android:gravity="center"
             android:hint="@string/password"
+            android:inputType="textPassword"
             android:textColor="@color/black"
             android:textColorHint="#757575" />
     </com.google.android.material.textfield.TextInputLayout>

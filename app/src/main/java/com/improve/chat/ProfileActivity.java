@@ -1,5 +1,7 @@
 package com.improve.chat;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +48,8 @@ public class ProfileActivity extends AppCompatActivity {
     StorageReference storageReference;
     String image;
 
+    ActivityResultLauncher<Intent> activityResultLauncherForImage;
+
 
 
     @Override
@@ -64,23 +68,13 @@ public class ProfileActivity extends AppCompatActivity {
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
+        registerActivityForImage();
+
         getUserInfo();
 
-        circleImageViewProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageChooser();
-            }
-        });
+        circleImageViewProfile.setOnClickListener(v -> imageChooser());
 
-        buttonUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                updateProfile();
-
-            }
-        });
+        buttonUpdate.setOnClickListener(v -> updateProfile());
     }
 
     public void updateProfile()
@@ -93,30 +87,19 @@ public class ProfileActivity extends AppCompatActivity {
         {
             UUID randomID = UUID.randomUUID();
             String imageName = "images/" + randomID + ".jpg";
-            storageReference.child(imageName).putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            storageReference.child(imageName).putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
 
-                    StorageReference myStorageRef = firebaseStorage.getReference(imageName);
-                    myStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                StorageReference myStorageRef = firebaseStorage.getReference(imageName);
+                myStorageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String filePath = uri.toString();
+                    reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
-                        public void onSuccess(Uri uri) {
-                            String filePath = uri.toString();
-                            reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    Toast.makeText(ProfileActivity.this, "Write to database is successful", Toast.LENGTH_SHORT).show();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(ProfileActivity.this, "Write to database is not successful", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                        public void onSuccess(Void unused) {
+                            Toast.makeText(ProfileActivity.this, "Write to database is successful", Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    }).addOnFailureListener(e -> Toast.makeText(ProfileActivity.this, "Write to database is not successful", Toast.LENGTH_SHORT).show());
+                });
 
-                }
             });
         }
         else
@@ -166,9 +149,27 @@ public class ProfileActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,1);
+        //startActivityForResult(intent,1);
+        activityResultLauncherForImage.launch(intent);
     }
 
+    public void registerActivityForImage()
+    {
+        activityResultLauncherForImage = registerForActivityResult(new ActivityResultContracts
+                .StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK)
+                    {
+                         imageUri = result.getData().getData();
+                         Picasso.get().load(imageUri).into(circleImageViewProfile);
+                         imageControl = true;
+                    }
+                    else
+                    {
+                        imageControl = false;
+                    }
+                });
+    }
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -182,5 +183,5 @@ public class ProfileActivity extends AppCompatActivity {
         {
             imageControl = false;
         }
-    }
+    } */
 }

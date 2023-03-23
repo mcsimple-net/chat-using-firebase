@@ -33,38 +33,32 @@ public class ForgetActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        buttonForget.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonForget.setOnClickListener(v -> {
 
-                String email = editTextForget.getText().toString();
-                if (!email.equals(""))
-                {
-                    passwordReset(email);
-                }
-
+            String email = editTextForget.getText().toString();
+            if (!email.equals(""))
+            {
+                passwordReset(email);
             }
+
         });
 
     }
 
     public void passwordReset(String email)
     {
-        auth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful())
-                {
-                    Toast.makeText(ForgetActivity.this, "Reset link is in your email", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(ForgetActivity.this,MyLoginActivity.class);
-                    startActivity(i);
-                    finish();
+        auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+            if (task.isSuccessful())
+            {
+                Toast.makeText(ForgetActivity.this, "Reset link is in your email", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(ForgetActivity.this,MyLoginActivity.class);
+                startActivity(i);
+                finish();
 
-                }
-                else
-                {
-                    Toast.makeText(ForgetActivity.this, "Problem...", Toast.LENGTH_SHORT).show();
-                }
+            }
+            else
+            {
+                Toast.makeText(ForgetActivity.this, "Problem...", Toast.LENGTH_SHORT).show();
             }
         });
     }

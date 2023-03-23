@@ -53,66 +53,54 @@ public class MyLoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
 
-        buttonSignin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonSignin.setOnClickListener(v -> {
 
-                String email = editTextEmail.getText().toString();
-                String password = editTextPassword.getText().toString();
+            String email = editTextEmail.getText().toString();
+            String password = editTextPassword.getText().toString();
 
-                if (!email.equals("") && !password.equals(""))
-                {
-                    signin(email,password);
-                }
-                else
-                {
-                    Toast.makeText(MyLoginActivity.this, "Write your credentials"
-                            , Toast.LENGTH_SHORT).show();
-                }
-
+            if (!email.equals("") && !password.equals(""))
+            {
+                signin(email,password);
             }
+            else
+            {
+                Toast.makeText(this, "Write your credentials"
+                        , Toast.LENGTH_SHORT).show();
+            }
+
         });
 
-        buttonSignup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonSignup.setOnClickListener(v -> {
 
-                Intent intent = new Intent(MyLoginActivity.this,SignUpActivity.class);
-                startActivity(intent);
-                finish();
+            Intent intent = new Intent(MyLoginActivity.this,SignUpActivity.class);
+            startActivity(intent);
+            finish();
 
-            }
         });
 
-        textViewForgot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        textViewForgot.setOnClickListener(v -> {
 
-                Intent i = new Intent(MyLoginActivity.this,ForgetActivity.class);
-                startActivity(i);
-                finish();
+            Intent i = new Intent(MyLoginActivity.this,ForgetActivity.class);
+            startActivity(i);
+            finish();
 
-            }
         });
 
     }
 
     public void signin(String email, String password)
     {
-        auth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful())
-                {
-                    Intent intent = new Intent(MyLoginActivity.this,MainActivity.class);
-                    startActivity(intent);
-                    finish();
+        auth.signInWithEmailAndPassword(email,password).addOnCompleteListener(task -> {
+            if (task.isSuccessful())
+            {
+                Intent intent = new Intent(MyLoginActivity.this,MainActivity.class);
+                startActivity(intent);
+                finish();
 
-                }
-                else
-                {
-                    Toast.makeText(MyLoginActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                }
+            }
+            else
+            {
+                Toast.makeText(MyLoginActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
         });
     }
