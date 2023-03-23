@@ -92,12 +92,13 @@ public class ProfileActivity extends AppCompatActivity {
                 StorageReference myStorageRef = firebaseStorage.getReference(imageName);
                 myStorageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                     String filePath = uri.toString();
-                    reference.child("Users").child(auth.getUid()).child("image").setValue(filePath).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Toast.makeText(ProfileActivity.this, "Write to database is successful", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(e -> Toast.makeText(ProfileActivity.this, "Write to database is not successful", Toast.LENGTH_SHORT).show());
+                    reference.child("Users").child(auth.getUid()).child("image")
+                            .setValue(filePath).addOnSuccessListener(unused -> Toast
+                                    .makeText(ProfileActivity.this
+                                            , "Write to database is successful"
+                                            , Toast.LENGTH_SHORT).show()).addOnFailureListener(e ->
+                                    Toast.makeText(ProfileActivity.this, "Write to database is not successful"
+                                            , Toast.LENGTH_LONG).show());
                 });
 
             });
