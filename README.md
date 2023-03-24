@@ -3,6 +3,8 @@
 
 [![IT Remedy](https://img.shields.io/badge/IT%20Remedy-Chat-brightgreen?style=flat)](https://itremedy.pro)
 
+<b>This app uses Firebase to store users information and chats. It's not very secure. I've created it only for studying purposes.</b>
+
 <p align="center"><img src="assets/chat-signin.png" width=30% height=30% /></p>
 
 **Requirements**
