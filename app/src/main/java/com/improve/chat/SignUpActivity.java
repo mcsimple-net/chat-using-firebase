@@ -33,7 +33,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private CircleImageView circleImageView;
+    public CircleImageView circleImageView;
     private TextInputEditText editTextEmailSignup, editTextPasswordSignup, editTextUsernameSignup;
     private Button buttonRegister;
     Boolean imageControl = false;
@@ -97,6 +97,8 @@ public class SignUpActivity extends AppCompatActivity {
         //startActivityForResult(intent,1);
         activityResultLauncherForImage.launch(intent);
     }
+
+    //It's deprecated, but for now it works. I've decided not to use it.
 /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

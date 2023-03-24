@@ -35,6 +35,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileActivity extends AppCompatActivity {
 
     private CircleImageView circleImageViewProfile;
+
     private TextInputEditText editTextUsernameProfile;
     private Button buttonUpdate;
 
@@ -150,7 +151,7 @@ public class ProfileActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        //startActivityForResult(intent,1);
+        //startActivityForResult(intent,1); //It's deprecated, but for now it works. I've decided not to use it.
         activityResultLauncherForImage.launch(intent);
     }
 
@@ -158,18 +159,29 @@ public class ProfileActivity extends AppCompatActivity {
     {
         activityResultLauncherForImage = registerForActivityResult(new ActivityResultContracts
                 .StartActivityForResult(), result -> {
-                    if (result.getResultCode() == RESULT_OK)
+                   /* if (result.getResultCode() == RESULT_OK)
                     {
                          imageUri = result.getData().getData();
                          Picasso.get().load(imageUri).into(circleImageViewProfile);
                          imageControl = true;
-                    }
+                    } */
+//this variant looks better
+                     if (result.getResultCode() == RESULT_OK) {
+                         Intent data = result.getData();
+                         if (data != null) {
+                             imageUri = data.getData();
+                             Picasso.get().load(imageUri).into(circleImageViewProfile);
+                             imageControl = true;
+                         }
+                     }
                     else
                     {
                         imageControl = false;
                     }
                 });
     }
+
+    //It's deprecated, but for now it works. I've decided not to use it.
 /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
